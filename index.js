@@ -22,6 +22,12 @@ async function run() {
             const books = await cursor.toArray();
             res.send(books);
         })
+        app.get('/home/book', async (req, res) => {
+            const query = {};
+            const cursor = booksCollection.find(query).limit(6);
+            const books = await cursor.toArray();
+            res.send(books);
+        })
     }
     finally {
 
