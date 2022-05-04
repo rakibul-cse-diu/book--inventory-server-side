@@ -1,6 +1,6 @@
 const express = require('express');
 const cors = require('cors');
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const port = process.env.PORT || 5000;
 
 const app = express();
@@ -27,6 +27,12 @@ async function run() {
             const cursor = booksCollection.find(query).limit(6);
             const books = await cursor.toArray();
             res.send(books);
+        })
+        app.get('/inventory/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: ObjectId(id) };
+            const book = await booksCollection.findOne(query);
+            res.send(book);
         })
     }
     finally {
