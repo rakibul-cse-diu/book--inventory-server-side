@@ -34,6 +34,21 @@ async function run() {
             const book = await booksCollection.findOne(query);
             res.send(book);
         })
+
+        app.put('/inventory/:id', async (req, res) => {
+            const id = req.params.id;
+            const newItem = req.body;
+            const filter = { _id: ObjectId(id) };
+            const options = { upsert: true };
+            const updatedDoc = {
+                $set: {
+                    quantity: parseInt(newItem.quantity)
+                }
+            };
+            const result = await booksCollection.updateOne(filter, updatedDoc, options);
+            res.send(result);
+            // console.log(typeof (newItem.quantity));
+        })
     }
     finally {
 
