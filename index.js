@@ -64,6 +64,18 @@ async function run() {
             const result = await booksCollection.deleteOne(query);
             res.send(result);
         })
+        // get item for specific user by their email
+        app.get('/myitems', async (req, res) => {
+            const email = req.query.email;
+            const query = {
+                email: {
+                    $in: [email]
+                }
+            };
+            const cursor = booksCollection.find(query);
+            const items = await cursor.toArray();
+            res.send(items);
+        })
     }
     finally {
 
