@@ -16,25 +16,28 @@ async function run() {
         await client.connect();
         const booksCollection = client.db('books-inventory').collection('books')
 
+        // get all item from collection 
         app.get('/books', async (req, res) => {
             const query = {};
             const cursor = booksCollection.find(query);
             const books = await cursor.toArray();
             res.send(books);
         })
+        // get limited(6) item from collection 
         app.get('/home/book', async (req, res) => {
             const query = {};
             const cursor = booksCollection.find(query).limit(6);
             const books = await cursor.toArray();
             res.send(books);
         })
+        // get specific item from collection 
         app.get('/inventory/:id', async (req, res) => {
             const id = req.params.id;
             const query = { _id: ObjectId(id) };
             const book = await booksCollection.findOne(query);
             res.send(book);
         })
-
+        // update a specific item 
         app.put('/inventory/:id', async (req, res) => {
             const id = req.params.id;
             const newItem = req.body;
@@ -47,7 +50,19 @@ async function run() {
             };
             const result = await booksCollection.updateOne(filter, updatedDoc, options);
             res.send(result);
-            // console.log(typeof (newItem.quantity));
+        })
+        // Add item
+        app.post('/additem', async (req, res) => {
+            const user = req.body;
+            const result = await booksCollection.insertOne(user);
+            res.send(result);
+        })
+        // delete specific item
+        app.delete('/inventory/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: ObjectId(id) };
+            const result = await booksCollection.deleteOne(query);
+            res.send(result);
         })
     }
     finally {
