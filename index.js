@@ -15,10 +15,13 @@ function verifyJwt(req, res, next) {
         return res.status(401).send({ message: 'Unauthorized Access' })
     }
     const token = auth.split(' ')[1];
+    console.log(token)
     jwt.verify(token, process.env.SEC_KEY, (err, decoded) => {
         if (err) {
+            console.log("ver err")
             return res.status(403).send({ message: 'Access Forbidden' })
         }
+        // console.log("ver dec", decoded)
         req.decoded = decoded;
         next();
     })
@@ -83,7 +86,11 @@ async function run() {
         app.get('/myitems', verifyJwt, async (req, res) => {
             const email = req.query.email;
             const decodedEmail = req.decoded.email;
-            if (decodedEmail === email) {
+            // console.log("req", req.decoded)
+            // console.log("dec", decodedEmail)
+            // console.log("em", email)
+            // console.log(decodedEmail === email)
+            if (email === decodedEmail) {
                 const query = {
                     email: {
                         $in: [email]
@@ -91,9 +98,10 @@ async function run() {
                 };
                 const cursor = booksCollection.find(query);
                 const items = await cursor.toArray();
+                console.log(items)
                 res.send(items);
             } else {
-                return res.status(403).send({ message: 'Access Forbidden' });
+                return res.status(403).send({ message: '403, Access Forbidden' });
             }
 
         })
