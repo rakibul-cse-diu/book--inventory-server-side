@@ -9,6 +9,20 @@ require('dotenv').config();
 app.use(cors());
 app.use(express.json());
 
+function verifyJwt(req, res, next) {
+    const auth = req.headers.authorization;
+    if (!auth) {
+        return res.status(401).send({ message: 'Unauthorized Access' })
+    }
+    const token = auth.split(' ')[1];
+    jwt.verify(token, process.env.SEC_KEY, (err, decoded) => {
+        if (err) {
+            return res.status(403).send({ message: 'Access Forbidden' })
+        }
+        req.decoded = decoded;
+        next();
+    })
+}
 
 const uri = `mongodb+srv://${process.env.MONGO_USER}:${process.env.MONGO_PASS}@node-mongo-server-1.pkxfn.mongodb.net/myFirstDatabase?retryWrites=true&w=majority`;
 const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true, serverApi: ServerApiVersion.v1 });
@@ -66,24 +80,30 @@ async function run() {
             res.send(result);
         })
         // get item for specific user by their email
-        app.get('/myitems', async (req, res) => {
+        app.get('/myitems', verifyJwt, async (req, res) => {
             const email = req.query.email;
-            const query = {
-                email: {
-                    $in: [email]
-                }
-            };
-            const cursor = booksCollection.find(query);
-            const items = await cursor.toArray();
-            res.send(items);
+            const decodedEmail = req.decoded.email;
+            if (decodedEmail === email) {
+                const query = {
+                    email: {
+                        $in: [email]
+                    }
+                };
+                const cursor = booksCollection.find(query);
+                const items = await cursor.toArray();
+                res.send(items);
+            } else {
+                return res.status(403).send({ message: 'Access Forbidden' });
+            }
+
         })
         // Auth JWT 
         app.post('/login', (req, res) => {
-            const user = req.body;
-            const accessToken = jwt.sign(user, process.env.SEC_KEY, {
+            const userEmail = req.body;
+            const accessToken = jwt.sign(userEmail, process.env.SEC_KEY, {
                 expiresIn: '1d'
             })
-            res.send(accessToken);
+            res.send({ accessToken });
         })
     }
     finally {
