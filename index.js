@@ -15,10 +15,8 @@ function verifyJwt(req, res, next) {
         return res.status(401).send({ message: 'Unauthorized Access' })
     }
     const token = auth.split(' ')[1];
-    console.log(token)
     jwt.verify(token, process.env.SEC_KEY, (err, decoded) => {
         if (err) {
-            console.log("ver err")
             return res.status(403).send({ message: 'Access Forbidden' })
         }
         req.decoded = decoded;
@@ -93,7 +91,6 @@ async function run() {
                 };
                 const cursor = booksCollection.find(query);
                 const items = await cursor.toArray();
-                console.log(items)
                 res.send(items);
             } else {
                 return res.status(403).send({ message: '403, Access Forbidden' });
