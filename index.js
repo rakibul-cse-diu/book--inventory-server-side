@@ -21,7 +21,6 @@ function verifyJwt(req, res, next) {
             console.log("ver err")
             return res.status(403).send({ message: 'Access Forbidden' })
         }
-        // console.log("ver dec", decoded)
         req.decoded = decoded;
         next();
     })
@@ -86,10 +85,6 @@ async function run() {
         app.get('/myitems', verifyJwt, async (req, res) => {
             const email = req.query.email;
             const decodedEmail = req.decoded.email;
-            // console.log("req", req.decoded)
-            // console.log("dec", decodedEmail)
-            // console.log("em", email)
-            // console.log(decodedEmail === email)
             if (email === decodedEmail) {
                 const query = {
                     email: {
