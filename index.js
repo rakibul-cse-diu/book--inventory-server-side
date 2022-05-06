@@ -1,6 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
+const jwt = require('jsonwebtoken');
 const port = process.env.PORT || 5000;
 
 const app = express();
@@ -75,6 +76,14 @@ async function run() {
             const cursor = booksCollection.find(query);
             const items = await cursor.toArray();
             res.send(items);
+        })
+        // Auth JWT 
+        app.post('/login', (req, res) => {
+            const user = req.body;
+            const accessToken = jwt.sign(user, process.env.SEC_KEY, {
+                expiresIn: '1d'
+            })
+            res.send(accessToken);
         })
     }
     finally {
